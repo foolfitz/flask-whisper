@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real-time Transcription and Translation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+    <script>
+      const socket = io('http://localhost:5000');
+      socket.on('new_transcript', (data) => {
+        const { timestamp, en_text, zh_text } = data;
+        const transcriptElement = document.createElement('div');
+        transcriptElement.innerHTML = `
+          <p>Timestamp: ${new Date(timestamp * 1000).toLocaleString()}</p>
+          <p>English: ${en_text}</p>
+          <p>Chinese: ${zh_text}</p>
+          <hr>
+        `;
+        document.getElementById('transcript-container').appendChild(transcriptElement);
+      });
+
+      socket.on('history', (history) => {
+        history.forEach((data) => {
+          const { timestamp, en_text, zh_text } = data;
+          const transcriptElement = document.createElement('div');
+          transcriptElement.innerHTML = `
+            <p>Timestamp: ${new Date(timestamp * 1000).toLocaleString()}</p>
+            <p>English: ${en_text}</p>
+            <p>Chinese: ${zh_text}</p>
+            <hr>
+          `;
+          document.getElementById('transcript-container').appendChild(transcriptElement);
+        });
+      });
+
+      function startTranscription() {
+        console.log('Starting transcription...');
+        socket.emit('start_transcription');
+      }
+      function stopTranscription() {
+        console.log('Stopping transcription...');
+        socket.emit('stop_transcription');
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Real-time Transcription and Translation</h1>
+    <button id="start-button" onclick="startTranscription()">開始錄音</button>
+    <button id="stop-button" onclick="stopTranscription()">停止錄音</button>
+    <div id="transcript-container"></div>
+  </body>
+</html>
